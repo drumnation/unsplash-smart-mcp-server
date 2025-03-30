@@ -1,0 +1,16 @@
+{
+  "config": {
+    "default": false,
+    "MD023": true,
+    "MD025": true,
+    "MD040": true
+  },
+  "ignores": [
+    "**/node_modules/**",
+    "**/dist/**", 
+    "**/build/**",
+    "**/apps/testing-e2e/.vscode-test/**",
+    "**/apps/testing-integration/.vscode-test/**",
+    "**/apps/vscode-extension/.vscode-test/**"
+  ]
+} 

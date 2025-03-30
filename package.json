@@ -1,0 +1,62 @@
+{
+  "name": "unsplash-smart-mcp-server",
+  "version": "1.0.0",
+  "description": "AI-powered FastMCP server for intelligent stock photo search, download, and attribution management from Unsplash",
+  "main": "dist/server.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "tsx src/server.ts",
+    "dev": "npx fastmcp dev src/server.ts",
+    "inspect": "npx fastmcp inspect src/server.ts",
+    "test": "tsx --test src/__tests__/**/*.test.ts",
+    "test:manual": "tsx tests/test-stock-photo.js",
+    "lint": "eslint . --ext .ts",
+    "generate-attributions": "tsx scripts/generate-attributions.ts",
+    "prepare-release": "npm run build && npm run test"
+  },
+  "keywords": [
+    "unsplash",
+    "mcp",
+    "fastmcp",
+    "api",
+    "stock-photos",
+    "ai-agent",
+    "attribution",
+    "images",
+    "cursor",
+    "claude"
+  ],
+  "author": "drumnation",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/drumnation/unsplash-smart-mcp-server.git"
+  },
+  "homepage": "https://github.com/drumnation/unsplash-smart-mcp-server#readme",
+  "bugs": {
+    "url": "https://github.com/drumnation/unsplash-smart-mcp-server/issues"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.8.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "exiftool-vendored": "^24.2.0",
+    "express": "^5.0.1",
+    "fastmcp": "^1.0.0",
+    "fs-extra": "^11.1.1",
+    "glob": "^10.3.10",
+    "zod": "^3.21.4"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/fs-extra": "^11.0.1",
+    "@types/node": "^18.16.0",
+    "tsx": "^4.15.0",
+    "typescript": "^5.0.4"
+  },
+  "engines": {
+    "node": ">=18.x"
+  }
+}

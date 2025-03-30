@@ -375,4 +375,4 @@ For issues or questions, please [open an issue](https://github.com/yourusername/
 <p align="center">
   <strong>Empower your AI agents with the perfect images, every time.</strong><br>
   Built with ❤️ for developers and AI enthusiasts.
-</p> # unsplash-smart-mcp-server
+</p>

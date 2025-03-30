@@ -1,0 +1,31 @@
+{
+  "attributionSettings": {
+    "databasePath": "~/.unsplash-mcp/unsplash-attributions.json",
+    "enableMetadata": true,
+    "metadataFormats": ["XMP", "IPTC", "EXIF"],
+    "generateAttributionPage": true,
+    "attributionPageTemplate": "html"
+  },
+  "defaultOutputFormats": {
+    "attributionFile": "html",
+    "componentOutput": "react"
+  },
+  "projectTemplates": {
+    "nextjs": {
+      "attributionPath": "public/attributions",
+      "componentPath": "components/ImageAttribution.tsx"
+    },
+    "react": {
+      "attributionPath": "src/assets/attributions",
+      "componentPath": "src/components/ImageAttribution.tsx"
+    },
+    "vue": {
+      "attributionPath": "public/attributions",
+      "componentPath": "src/components/ImageAttribution.vue"
+    },
+    "angular": {
+      "attributionPath": "src/assets/attributions",
+      "componentPath": "src/app/components/image-attribution/image-attribution.component.ts"
+    }
+  }
+} 

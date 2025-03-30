@@ -1,0 +1,9 @@
+# Default configuration
+default: false
+
+# Only rules that materially affect AI parsing
+MD023: true # Headers must start at the beginning of the line
+MD025: true # Single title/h1 per document
+MD040: true # Fenced code blocks should have a language specified
+
+# All other rules disabled as they don't significantly impact AI comprehension

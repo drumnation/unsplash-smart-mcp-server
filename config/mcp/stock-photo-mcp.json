@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "stock_photo": {
+      "command": "tsx",
+      "args": ["/Users/dmieloch/Dev/singularityApps/mcp-servers/unsplash-mcp/src/server.ts"],
+      "disabled": false,
+      "env": {
+        "UNSPLASH_ACCESS_KEY": "Ahw5GzA-2fIX3ffrKHiHwTmy8dTWEmvWYpSK0wKzZw0",
+        "UNSPLASH_SECRET_KEY": "mOu0anJGb2x-f0aEWJZgosjFyCYk10ordkjhkULauTU",
+        "UNSPLASH_APPLICATION_ID": "730349"
+      }
+    }
+  }
+} 
