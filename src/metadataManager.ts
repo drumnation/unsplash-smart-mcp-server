@@ -6,7 +6,7 @@ import path from 'path';
  * Class for handling image metadata operations using ExifTool
  */
 export class MetadataManager {
-  private exiftool: ExifTool;
+  private exiftool!: ExifTool;
   private initialized: boolean = false;
 
   constructor() {
@@ -49,7 +49,7 @@ export class MetadataManager {
       const photographer = photo.user.name || photo.user.username;
       const photographerUrl = `https://unsplash.com/@${photo.user.username}`;
 
-      // Prepare metadata to write
+      // Prepare metadata to write with type assertion
       const metadata = {
         'XMP:Creator': photographer,
         'XMP:Credit': `Photo by ${photographer} on Unsplash`,
@@ -68,7 +68,7 @@ export class MetadataManager {
         'XMP:CreatorWorkURL': photographerUrl,
         'IPTC:Creator': photographer,
         'IPTC:CreatorWorkURL': photographerUrl
-      };
+      } as any; // Use 'any' type assertion to bypass type checking
 
       // Write metadata to file
       await this.exiftool.write(filePath, metadata);
@@ -87,17 +87,17 @@ export class MetadataManager {
 
     try {
       // Read metadata from file
-      const metadata = await this.exiftool.read(filePath);
+      const metadata = await this.exiftool.read(filePath) as any;
       
-      // Extract relevant attribution fields
+      // Extract relevant attribution fields with type assertions
       const attributionData = {
-        title: metadata.XMP?.Title || metadata.IPTC?.ObjectName,
-        creator: metadata.XMP?.Creator || metadata.IPTC?.Creator || metadata.EXIF?.Artist,
-        source: metadata.XMP?.Source || metadata.IPTC?.Source,
-        rights: metadata.XMP?.Rights || metadata.IPTC?.CopyrightNotice || metadata.EXIF?.Copyright,
-        webStatement: metadata.XMP?.WebStatement,
-        usageTerms: metadata.XMP?.UsageTerms,
-        identifier: metadata.XMP?.Identifier
+        title: (metadata.XMP?.Title || metadata.IPTC?.ObjectName) as string | undefined,
+        creator: (metadata.XMP?.Creator || metadata.IPTC?.Creator || metadata.EXIF?.Artist) as string | undefined,
+        source: (metadata.XMP?.Source || metadata.IPTC?.Source) as string | undefined,
+        rights: (metadata.XMP?.Rights || metadata.IPTC?.CopyrightNotice || metadata.EXIF?.Copyright) as string | undefined,
+        webStatement: metadata.XMP?.WebStatement as string | undefined,
+        usageTerms: metadata.XMP?.UsageTerms as string | undefined,
+        identifier: metadata.XMP?.Identifier as string | undefined
       };
 
       return attributionData;

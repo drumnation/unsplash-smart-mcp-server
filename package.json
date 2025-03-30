@@ -11,6 +11,8 @@
     "inspect": "npx fastmcp inspect src/server.ts",
     "test": "tsx --test src/__tests__/**/*.test.ts",
     "test:manual": "tsx tests/test-stock-photo.js",
+    "test:docker": "tsx tests/docker/docker-test.js",
+    "test:smithery": "tsx tests/docker/smithery-integration.js",
     "lint": "eslint . --ext .ts",
     "generate-attributions": "tsx scripts/generate-attributions.ts",
     "prepare-release": "npm run build && npm run test"
@@ -54,7 +56,8 @@
     "@types/fs-extra": "^11.0.1",
     "@types/node": "^18.16.0",
     "tsx": "^4.15.0",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "yaml": "^2.7.1"
   },
   "engines": {
     "node": ">=18.x"

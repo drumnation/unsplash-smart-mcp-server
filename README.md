@@ -56,7 +56,7 @@ In the landscape of visual content integration, our Unsplash Smart MCP Server st
 1. Install the MCP server in Cursor:
 
 ```bash
-claude mcp add unsplash https://github.com/yourusername/unsplash-smart-mcp.git
+claude mcp add unsplash https://github.com/drumnation/unsplash-smart-mcp-server.git
 ```
 
 2. Set up your Unsplash API key:
@@ -65,13 +65,96 @@ claude mcp add unsplash https://github.com/yourusername/unsplash-smart-mcp.git
 claude mcp config set unsplash UNSPLASH_ACCESS_KEY=your_api_key_here
 ```
 
+### Manual Configuration in Cursor
+
+If the `claude mcp add` command doesn't work for you, you can manually configure the MCP server in your Cursor settings:
+
+1. Locate your Cursor MCP configuration file:
+   - macOS: `~/.cursor/mcp.json`
+   - Windows: `%USERPROFILE%\.cursor\mcp.json`
+   - Linux: `~/.cursor/mcp.json`
+
+2. Add the Unsplash MCP server configuration to the `servers` object in the file:
+
+```json
+{
+  "servers": {
+    "unsplash": {
+      "command": "tsx",
+      "args": ["/path/to/unsplash-smart-mcp-server/src/server.ts"],
+      "env": {
+        "UNSPLASH_ACCESS_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
+```
+
+Replace `/path/to/unsplash-smart-mcp-server` with the actual path where you cloned the repository, and `your_api_key_here` with your actual Unsplash API key.
+
+3. Save the file and restart Cursor for the changes to take effect.
+
+4. Verify the integration by asking Claude in Cursor:
+
+```
+Find me an image of a mountain landscape
+```
+
+Claude should respond by using the Unsplash MCP server to search for and suggest mountain landscape images.
+
+### Via Smithery (Cloud Deployment)
+
+You can also deploy this MCP server via Smithery for cloud-based access:
+
+1. Visit [Smithery.ai](https://smithery.ai) and sign in
+2. Click "Add Server" and select "Import from GitHub"
+3. Enter the repository URL: `https://github.com/drumnation/unsplash-smart-mcp-server.git`
+4. Fill out the form with:
+   - ID: `@drumnation/unsplash-smart-mcp-server`
+   - Base Directory: `.` (just a period)
+   - Local Only: Unchecked (not required)
+5. Click "Create" to deploy the server
+6. Configure your Unsplash API key in the Smithery interface
+
+### Via Docker
+
+You can also run the server using Docker:
+
+1. Clone the repository:
+```bash
+git clone https://github.com/drumnation/unsplash-smart-mcp-server.git
+cd unsplash-smart-mcp-server
+```
+
+2. Build the Docker image:
+```bash
+docker build -t unsplash-mcp-server .
+```
+
+3. Run the container with your Unsplash API key:
+```bash
+docker run -i --rm -e UNSPLASH_ACCESS_KEY=your_api_key_here unsplash-mcp-server
+```
+
+4. To use with Cursor or another MCP client, add the following to your MCP configuration:
+```json
+{
+  "servers": {
+    "unsplash": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "-e", "UNSPLASH_ACCESS_KEY=your_api_key_here", "unsplash-mcp-server"]
+    }
+  }
+}
+```
+
 ### Manual Installation
 
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/unsplash-smart-mcp.git
-cd unsplash-smart-mcp
+git clone https://github.com/drumnation/unsplash-smart-mcp-server.git
+cd unsplash-smart-mcp-server
 ```
 
 2. Install dependencies:
@@ -368,7 +451,7 @@ Our server's attribution system makes it easy to provide proper credit to photog
 
 ## 📞 Contact
 
-For issues or questions, please [open an issue](https://github.com/yourusername/unsplash-smart-mcp/issues) on GitHub.
+For issues or questions, please [open an issue](https://github.com/drumnation/unsplash-smart-mcp-server/issues) on GitHub.
 
 ---
 
