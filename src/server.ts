@@ -705,3 +705,8 @@ function generateCodeExamples(args: any, photos: any[]): any[] {
   
   return examples;
 }
+
+// Start the server with stdio transport
+server.start({
+  transportType: "stdio"
+});

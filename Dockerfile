@@ -11,11 +11,14 @@ RUN npm ci
 # Copy source code
 COPY . .
 
+# Install global dependencies
+RUN npm install -g tsx
+
 # Build TypeScript
 RUN npm run build
 
 # Set environment variables
 ENV NODE_ENV=production
 
-# Command to run the server
-CMD ["node", "dist/server.js"]
+# Command to run the server - use npm start instead of direct tsx execution
+CMD ["npm", "start"]

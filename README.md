@@ -7,6 +7,8 @@ A powerful FastMCP server that enables AI agents to seamlessly search, recommend
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
 ![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.x-brightgreen)
 ![TypeScript Ready](https://img.shields.io/badge/TypeScript-Ready-blue)
+[![smithery badge](https://smithery.ai/badge/@drumnation/unsplash-smart-mcp-server)](https://smithery.ai/server/@drumnation/unsplash-smart-mcp-server)
+[![npm version](https://img.shields.io/npm/v/@drumnation/unsplash-smart-mcp-server.svg)](https://www.npmjs.com/package/@drumnation/unsplash-smart-mcp-server)
 
 ## 🚀 Why Choose This Unsplash Integration
 
@@ -51,37 +53,32 @@ In the landscape of visual content integration, our Unsplash Smart MCP Server st
 - Node.js 18.x or higher
 - An Unsplash API access key ([get one here](https://unsplash.com/developers))
 
-### Via Cursor (Recommended)
+### Local Installation (Recommended)
 
-1. Install the MCP server in Cursor:
-
+1. Clone the repository:
 ```bash
-claude mcp add unsplash https://github.com/drumnation/unsplash-smart-mcp-server.git
+git clone https://github.com/drumnation/unsplash-smart-mcp-server.git
+cd unsplash-smart-mcp-server
 ```
 
-2. Set up your Unsplash API key:
-
+2. Install dependencies:
 ```bash
-claude mcp config set unsplash UNSPLASH_ACCESS_KEY=your_api_key_here
+npm install
 ```
 
-### Manual Configuration in Cursor
+3. Configure your Cursor MCP settings:
+   - macOS: Edit `~/.cursor/mcp.json`
+   - Windows: Edit `%USERPROFILE%\.cursor\mcp.json`
+   - Linux: Edit `~/.cursor/mcp.json`
 
-If the `claude mcp add` command doesn't work for you, you can manually configure the MCP server in your Cursor settings:
-
-1. Locate your Cursor MCP configuration file:
-   - macOS: `~/.cursor/mcp.json`
-   - Windows: `%USERPROFILE%\.cursor\mcp.json`
-   - Linux: `~/.cursor/mcp.json`
-
-2. Add the Unsplash MCP server configuration to the `servers` object in the file:
-
+4. Add the following configuration:
 ```json
 {
   "servers": {
     "unsplash": {
-      "command": "tsx",
-      "args": ["/path/to/unsplash-smart-mcp-server/src/server.ts"],
+      "command": "npx",
+      "args": ["tsx", "src/server.ts"],
+      "cwd": "/absolute/path/to/unsplash-smart-mcp-server",
       "env": {
         "UNSPLASH_ACCESS_KEY": "your_api_key_here"
       }
@@ -90,35 +87,26 @@ If the `claude mcp add` command doesn't work for you, you can manually configure
 }
 ```
 
-Replace `/path/to/unsplash-smart-mcp-server` with the actual path where you cloned the repository, and `your_api_key_here` with your actual Unsplash API key.
+5. Replace:
+   - `/absolute/path/to/unsplash-smart-mcp-server` with the actual path where you cloned the repo
+   - `your_api_key_here` with your Unsplash API key
 
-3. Save the file and restart Cursor for the changes to take effect.
+6. Save the file and restart Cursor.
 
-4. Verify the integration by asking Claude in Cursor:
+> **Important:** Unlike many MCP servers, this server requires direct process piping and cannot be accessed via TCP ports or through npm directly due to how it handles FastMCP's I/O interactions. The local installation method is the most reliable approach.
 
+### Cursor CLI Alternative
+
+If you prefer using Cursor's CLI:
+
+```bash
+claude mcp add unsplash npx tsx /path/to/unsplash-smart-mcp-server/src/server.ts --cwd /path/to/unsplash-smart-mcp-server
+claude mcp config set unsplash UNSPLASH_ACCESS_KEY=your_api_key_here
 ```
-Find me an image of a mountain landscape
-```
 
-Claude should respond by using the Unsplash MCP server to search for and suggest mountain landscape images.
+Replace the paths and API key with your actual values.
 
-### Via Smithery (Cloud Deployment)
-
-You can also deploy this MCP server via Smithery for cloud-based access:
-
-1. Visit [Smithery.ai](https://smithery.ai) and sign in
-2. Click "Add Server" and select "Import from GitHub"
-3. Enter the repository URL: `https://github.com/drumnation/unsplash-smart-mcp-server.git`
-4. Fill out the form with:
-   - ID: `@drumnation/unsplash-smart-mcp-server`
-   - Base Directory: `.` (just a period)
-   - Local Only: Unchecked (not required)
-5. Click "Create" to deploy the server
-6. Configure your Unsplash API key in the Smithery interface
-
-### Via Docker
-
-You can also run the server using Docker:
+### Via Docker (Most Reliable Method)
 
 1. Clone the repository:
 ```bash
@@ -126,55 +114,61 @@ git clone https://github.com/drumnation/unsplash-smart-mcp-server.git
 cd unsplash-smart-mcp-server
 ```
 
-2. Build the Docker image:
-```bash
-docker build -t unsplash-mcp-server .
+2. Create a `docker-compose.yml` file:
+```yaml
+services:
+  unsplash-mcp:
+    build: .
+    image: unsplash-mcp-server
+    restart: always
+    stdin_open: true
+    tty: true
+    environment:
+      - UNSPLASH_ACCESS_KEY=your_api_key_here
 ```
 
-3. Run the container with your Unsplash API key:
+3. Build and start the container:
 ```bash
-docker run -i --rm -e UNSPLASH_ACCESS_KEY=your_api_key_here unsplash-mcp-server
+docker-compose up -d
 ```
 
-4. To use with Cursor or another MCP client, add the following to your MCP configuration:
+4. Configure your Cursor MCP settings:
+   - macOS: Edit `~/.cursor/mcp.json`
+   - Windows: Edit `%USERPROFILE%\.cursor\mcp.json`
+   - Linux: Edit `~/.cursor/mcp.json`
+
+5. Add the following configuration:
 ```json
 {
   "servers": {
     "unsplash": {
       "command": "docker",
-      "args": ["run", "-i", "--rm", "-e", "UNSPLASH_ACCESS_KEY=your_api_key_here", "unsplash-mcp-server"]
+      "args": ["exec", "-i", "unsplash-mcp-unsplash-mcp-1", "tsx", "src/server.ts"],
+      "env": {}
     }
   }
 }
 ```
 
-### Manual Installation
+6. Save the file and restart Cursor.
 
-1. Clone the repository:
+This setup will:
+- Start the server automatically when Docker starts
+- Restart the server if it crashes
+- Run in the background without terminal windows
+- Provide a reliable connection to Cursor
 
-```bash
-git clone https://github.com/drumnation/unsplash-smart-mcp-server.git
-cd unsplash-smart-mcp-server
-```
+### Via Smithery (Cloud Deployment)
 
-2. Install dependencies:
+If you prefer cloud deployment, you can use Smithery:
 
-```bash
-npm install
-```
-
-3. Create a `.env` file with your Unsplash API key:
-
-```
-UNSPLASH_ACCESS_KEY=your_api_key_here
-```
-
-4. Build and start the server:
+1. Install the server in Cursor via Smithery:
 
 ```bash
-npm run build
-npm start
+npx @smithery/cli install @drumnation/unsplash-smart-mcp-server --client cursor --key your_api_key_here
 ```
+
+2. Alternatively, you can log in to [Smithery.ai](https://smithery.ai) and deploy it through their web interface.
 
 ## 🧩 Integration with AI Agents
 
@@ -406,6 +400,7 @@ Images are automatically organized based on your project type:
 | **Authentication Error** | Verify your Unsplash API key is correctly set |
 | **No Images Found** | Try broader search terms or check your search query |
 | **Download Permission Issues** | Use `downloadMode: 'urls_only'` and manual download commands |
+| **Docker Container Exits Prematurely** | Ensure you're using `CMD ["npm", "start"]` in your Dockerfile instead of directly running the TypeScript file with tsx. This ensures the server stays running in a Docker environment. |
 | **Timeout Errors** | The default MCP timeout is 60 seconds, which may be insufficient for downloading larger images or processing multiple images. For image-heavy operations: 1) Process fewer images per request, 2) Use smaller image dimensions, 3) Consider using `urls_only` mode instead of auto-download, 4) Check network connectivity |
 | **Attribution Not Found** | Verify the image was downloaded through the MCP server |
 | **Unhandled MCP Errors** | If you see `"McpError: MCP error -32001: Request timed out"` errors, your request is likely taking too long. Break it into smaller operations or use the URLs-only approach |
@@ -452,6 +447,46 @@ Our server's attribution system makes it easy to provide proper credit to photog
 ## 📞 Contact
 
 For issues or questions, please [open an issue](https://github.com/drumnation/unsplash-smart-mcp-server/issues) on GitHub.
+
+## 🧰 Development and Testing
+
+### Running the Server Locally
+
+```bash
+# Clone the repository
+git clone https://github.com/drumnation/unsplash-smart-mcp-server.git
+cd unsplash-smart-mcp-server
+
+# Install dependencies
+npm install
+
+# Set up your environment variables
+cp .env.example .env
+# Edit .env to add your UNSPLASH_ACCESS_KEY
+
+# Start the development server
+npm run dev
+```
+
+### Testing
+
+The package includes a comprehensive test suite:
+
+```bash
+# Run core tests
+npm test
+
+# Run all tests and get a summary report
+npm run test:all
+```
+
+The test suite includes:
+- Unit and integration tests
+- Manual tool testing
+- Docker container tests
+- Smithery.ai integration tests
+
+For detailed information about testing, see [docs/testing.md](docs/testing.md).
 
 ---
 

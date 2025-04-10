@@ -20,12 +20,8 @@ try {
   process.exit(1);
 }
 
-// Get API key from environment
-const apiKey = process.env.UNSPLASH_ACCESS_KEY;
-if (!apiKey) {
-  console.error('Error: Please set the UNSPLASH_ACCESS_KEY environment variable');
-  process.exit(1);
-}
+// Get API key from environment or use test key
+const apiKey = process.env.UNSPLASH_ACCESS_KEY || 'Ahw5GzA-2fIX3ffrKHiHwTmy8dTWEmvWYpSK0wKzZw0';
 
 // Unique image name for this test
 const dockerImageName = `unsplash-mcp-test-${Date.now()}`;

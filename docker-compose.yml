@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  unsplash-mcp:
+    build: .
+    image: unsplash-mcp-server
+    restart: always
+    stdin_open: true
+    tty: true
+    ports:
+      - "42721:3000"
+    environment:
+      - UNSPLASH_ACCESS_KEY=Ahw5GzA-2fIX3ffrKHiHwTmy8dTWEmvWYpSK0wKzZw0 

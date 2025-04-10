@@ -9,20 +9,20 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Path to the server script
-const serverPath = path.join(__dirname, 'src', 'server.ts');
+const serverPath = path.join(__dirname, '..', 'src', 'server.ts');
 
-// Get API key from environment
-const apiKey = process.env.UNSPLASH_ACCESS_KEY;
-if (!apiKey) {
-  console.error('Error: Please set the UNSPLASH_ACCESS_KEY environment variable');
-  process.exit(1);
-}
+// Get API key from environment or use test key
+const apiKey = process.env.UNSPLASH_ACCESS_KEY || 'Ahw5GzA-2fIX3ffrKHiHwTmy8dTWEmvWYpSK0wKzZw0';
 
 console.log('Starting Stock Photo MCP server...');
 
 // Start the server as a child process
 const server = spawn('tsx', [serverPath], {
-  env: { ...process.env },
+  env: { 
+    ...process.env,
+    UNSPLASH_ACCESS_KEY: apiKey,
+    NODE_ENV: 'test'
+  },
   stdio: ['pipe', 'pipe', 'pipe']
 });
 
