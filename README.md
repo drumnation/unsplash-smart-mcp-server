@@ -170,6 +170,10 @@ npx @smithery/cli install @drumnation/unsplash-smart-mcp-server --client cursor 
 
 2. Alternatively, you can log in to [Smithery.ai](https://smithery.ai) and deploy it through their web interface.
 
+> **Note for Windows users:** Smithery deployment includes special handling for Windows compatibility.
+
+For detailed instructions and troubleshooting, see the [Smithery Deployment Guide](./docs/smithery-deployment.md).
+
 ## 🧩 Integration with AI Agents
 
 ### Step-by-Step Guide for Claude in Cursor
@@ -199,41 +203,52 @@ Ask Claude in Cursor for images using natural language prompts like these:
 "Find a professional image for a tech startup landing page hero section"
 ```
 
-```
-"I need a photo that represents innovation and creativity for my presentation"
+## 🪟 Windows Compatibility
+
+If you're using Windows and experiencing the "Client closed" error when running the MCP server in Cursor, follow these special configuration steps:
+
+### Windows-specific MCP Configuration
+
+Create a file named `mcp.json` in your `.cursor` directory (typically at `%USERPROFILE%\.cursor\mcp.json`) with one of these configurations:
+
+#### Option 1: Direct Node Execution (Recommended)
+
+```json
+{
+  "mcpServers": {
+    "stock_photo": {
+      "command": "node",
+      "args": ["./node_modules/.bin/tsx", "path/to/unsplash-mcp/src/server.ts"],
+      "disabled": false,
+      "env": {
+        "UNSPLASH_ACCESS_KEY": "your_api_key_here"
+      },
+      "shell": false
+    }
+  }
+}
 ```
 
-```
-"Get me a picture of a diverse team collaborating in a modern office environment"
+#### Option 2: PowerShell Approach
+
+```json
+{
+  "mcpServers": {
+    "stock_photo": {
+      "command": "powershell",
+      "args": ["-Command", "npx tsx path/to/unsplash-mcp/src/server.ts"],
+      "disabled": false,
+      "env": {
+        "UNSPLASH_ACCESS_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
 ```
 
-```
-"Find an abstract background that represents data and analytics"
-```
+For complete documentation on Windows compatibility, see [Windows Compatibility Guide](./docs/windows-compatibility.md).
 
-```
-"I need a photo of someone coding or debugging software for a blog post"
-```
-
-```
-"Find an image that conveys artificial intelligence ethics for my research paper"
-```
-
-```
-"Get a minimalist product photo with a white background for an e-commerce site"
-```
-
-```
-"Find a landscape photo that evokes a sense of possibility and exploration"
-```
-
-```
-"I need a photo showing user experience design for my UX portfolio"
-```
-
-```
-"Find an image representing sustainable technology for an environmental tech article"
-```
+## 🛠️ API Reference
 
 ### URL-First Approach: The Smart Choice
 

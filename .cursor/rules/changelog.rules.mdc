@@ -1,0 +1,118 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Changelog Management Rules
+
+## Changelog Purpose & Standards
+
+This file provides rules for managing changelog files within the project-brain-monorepo.
+
+### Format Standards
+- All changelogs MUST follow [Keep a Changelog](mdc:https:/keepachangelog.com/en/1.0.0) format
+- Version numbers MUST adhere to [Semantic Versioning](mdc:https:/semver.org/spec/v2.0.0.html)
+- Each package MUST maintain its own CHANGELOG.md in its root directory
+
+## Required Structure
+
+```markdown
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](mdc:https:/keepachangelog.com/en/1.0.0),
+and this project adheres to [Semantic Versioning](mdc:https:/semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Added
+- New features
+
+### Changed
+- Changes to existing functionality
+
+### Deprecated
+- Soon-to-be removed features
+
+### Removed
+- Removed features
+
+### Fixed
+- Bug fixes
+
+### Security
+- Vulnerability fixes
+
+## [x.y.z] - YYYY-MM-DD
+```
+
+## Change Categories
+
+1. **Added** - New features
+2. **Changed** - Changes to existing functionality
+3. **Deprecated** - Soon-to-be removed features
+4. **Removed** - Removed features
+5. **Fixed** - Bug fixes
+6. **Security** - Vulnerability fixes
+
+## Workflow Rules
+
+### Adding New Changes
+1. ✅ ALWAYS add changes to the [Unreleased] section first
+2. ✅ ALWAYS include a concise description of the change
+3. ✅ ALWAYS categorize changes correctly
+4. ⛔ NEVER add the same change multiple times
+5. ✅ ALWAYS maintain chronological order within each category (newest at top)
+
+### Release Process
+1. ✅ ALWAYS get the current date using terminal command: `date +'%Y-%m-%d'`
+2. ✅ ALWAYS move [Unreleased] content to a new version section with the date
+3. ✅ ALWAYS create an empty [Unreleased] section after a release
+4. ✅ ALWAYS include links to compare versions (at bottom of file)
+5. ✅ ALWAYS update the version in package.json to match the new release version
+
+## Version Management
+
+### Package.json Synchronization
+1. ✅ ALWAYS update package.json version when creating a new release
+2. ✅ ALWAYS ensure package.json version and CHANGELOG.md version match exactly
+3. ⛔ NEVER have mismatched versions between package.json and CHANGELOG.md
+4. ✅ ALWAYS update both files in the same commit
+
+### Version Update Command
+```bash
+# Update version in package.json
+npm version [major|minor|patch] --no-git-tag-version
+```
+
+### Version Validation
+Before release, run the following command to verify consistency:
+```bash
+node -e "const pkg = require('./package.json'); const fs = require('fs'); const cl = fs.readFileSync('./CHANGELOG.md', 'utf8'); const match = cl.match(/## \[([\d\.]+)\]/); console.log(pkg.version === match[1] ? 'Versions match ✅' : 'Version mismatch! ❌');"
+```
+
+## Version Numbering
+
+1. **Major (x.0.0)** - Incompatible API changes
+2. **Minor (0.x.0)** - Backwards-compatible functionality additions
+3. **Patch (0.0.x)** - Backwards-compatible bug fixes
+
+## Pre-Commit Validation
+
+Before committing changelog changes:
+1. Verify sections are in the correct order
+2. Ensure all entries are properly categorized
+3. Check that version follows semantic versioning
+4. Verify date is dynamically generated using terminal
+5. Confirm all entries are clear and concise
+6. Verify package.json version matches CHANGELOG.md version
+
+## Release Checklist
+
+1. Move [Unreleased] items to new version section
+2. Add current date using `date +'%Y-%m-%d'` command
+3. Update package.json version to match new CHANGELOG.md version
+4. Create empty [Unreleased] section
+5. Update version comparison links at bottom of file
+6. Commit both CHANGELOG.md and package.json together

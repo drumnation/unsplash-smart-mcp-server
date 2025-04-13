@@ -1,0 +1,46 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+## Date Command Usage:
+```bash
+# For full timestamps (ALWAYS use this format for document headers and meeting notes):
+date +'%A, %B %d, %Y at %I:%M:%S %p'
+
+# For date-only fields:
+date +'%Y-%m-%d'
+
+# For log timestamps:
+date +'%Y-%m-%d %H:%M:%S'
+```
+
+## Common Scenarios Requiring Date Generation:
+1. Creating/updating documents
+2. Writing meeting notes
+3. Setting "Last Updated" timestamps
+4. Recording creation dates
+5. Dating project milestones
+6. Setting review dates
+7. Adding timestamps to logs
+
+## Validation Steps:
+Before completing ANY task involving dates:
+1. Search for date fields that need updating
+2. Run date command for each field
+3. Update ALL dates using command output
+4. Verify no hardcoded dates remain
+
+## Examples:
+
+✅ CORRECT:
+```markdown
+# Meeting Notes
+## $(date +'%A, %B %d, %Y at %I:%M:%S %p')
+```
+
+❌ INCORRECT:
+- Copying dates from other files
+- Using hardcoded dates
+- Leaving dates unchanged
+- Making assumptions about current date

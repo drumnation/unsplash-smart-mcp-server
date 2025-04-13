@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "stock_photo": {
+      "command": "node",
+      "args": ["./node_modules/.bin/tsx", "src/server.ts"],
+      "disabled": false,
+      "env": {
+        "UNSPLASH_ACCESS_KEY": "Ahw5GzA-2fIX3ffrKHiHwTmy8dTWEmvWYpSK0wKzZw0"
+      },
+      "shell": false
+    }
+  }
+} 

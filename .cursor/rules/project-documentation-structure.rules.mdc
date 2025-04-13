@@ -1,0 +1,43 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+## Documentation Workflow (Agent Action)
+
+1.  **Domain Knowledge Capture:** When working on a feature or complex task, capture significant domain knowledge (design decisions, tricky implementation details, rationales, API usage notes, error handling strategies, configuration details) that isn't obvious from the code itself.
+
+2.  **File Creation & Enhancement for Discoverability:**
+    * **Action:** Create new Markdown (`.md`) files for this knowledge within the appropriate subfolder (e.g., under `docs/features/`, `docs/concepts/`, `docs/architecture/adr/`). Use descriptive kebab-case filenames.
+    * **Action:** **Include Structured Metadata (YAML Frontmatter):** At the very **top** of EVERY new or significantly updated documentation file, include or update a YAML frontmatter block. This is critical for search and indexing:
+      ```yaml
+      ---
+      title: "[Clear, Descriptive Title of Document]" # Human-readable title
+      description: "[One-sentence summary focusing on key concepts and purpose]" # Concise explanation
+      keywords: # Comprehensive list for keyword search (grep) and potential RAG indexing
+        - "[primary topic]"
+        - "[key technology involved, e.g., React, Vitest, Docker]"
+        - "[feature name]"
+        - "[related component name]"
+        - "[core concept]"
+        - "[synonym or alternative term]"
+        - "[specific function name if relevant]"
+        - "[error code if relevant]"
+      related_features: ["[feature-folder-name]", "[another-feature]"] # Links to related feature doc folders (use folder names)
+      related_concepts: ["[concept-folder-name]"] # Links to related concept doc folders
+      related_adr: ["[adr-number]"] # Optional: Link to relevant ADRs
+      last_updated: "[YYYY-MM-DD]" # Date of creation/last significant update
+      # author: "[Agent/User Name - Optional]"
+      ---
+      ```
+    * **Action:** **Write a Concise Summary/Abstract:** Immediately following the frontmatter, write a short paragraph (2-4 sentences) summarizing the document's main content and purpose. Naturally weave in the most important keywords from the frontmatter. This helps RAG context retrieval.
+    * **Action:** **Use Descriptive Headings:** Structure the main document content using clear, keyword-rich Markdown headings (`##`, `###`) that accurately reflect the information in each section. This helps both human readers and semantic search.
+    * **Action:** **Embed Cross-Links:** Where relevant within the main content, add explicit Markdown links (`[link text](mdc:relative/path/to/other/doc.md)` or `[link text](mdc:[root-relative-path])`) to other related documentation files within `/docs` or even specific code files/sections. This strengthens the knowledge graph for RAG.
+    * **Action:** **Capture Detailed Knowledge:** Populate the rest of the file with the detailed domain knowledge, decisions, implementation notes, etc., captured in Step 1, using clear language and code blocks where appropriate.
+
+3.  **Index Updates:** **CRITICAL:** After adding or significantly modifying a documentation file:
+    * **Action:** ALWAYS update the corresponding `[foldername].index.md` file in its parent directory. Add/update the link using the `title` from the frontmatter and the `description` from the frontmatter for context.
+    * **Action:** ALWAYS update the `last_updated` field in the frontmatter of the modified/created document itself.
+    * **Action:** Consider if the root `docs.index.md` or higher-level indexes need updates to reflect the new content, especially for major additions. Ensure discoverability through navigation.
+
+4.  **Review Existing Docs (Consultation):** Before creating new documentation, use the `consult-documentation-index` rule/process to check relevant index files and potentially perform searches (`grep` or semantic using keywords) to see if similar information already exists. Update existing documents rather than creating duplicates whenever practical.

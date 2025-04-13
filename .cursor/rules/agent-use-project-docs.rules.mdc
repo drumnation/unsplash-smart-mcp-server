@@ -1,0 +1,53 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Rule: Agent Use of Project Documentation
+
+## Purpose
+Ensure that agents actively reference existing project documentation during planning, implementation, and debugging. This reinforces architecture decisions, prevents duplication, and leverages prior domain knowledge.
+
+---
+
+## When to Read Docs
+
+Agents MUST consult relevant documentation:
+
+- Before implementing or planning a new feature  
+- Before debugging a non-trivial issue  
+- When using or modifying any shared component, service, or utility  
+- When setting up a new app, package, or configuration  
+- When unsure about naming, architecture, or design patterns
+
+---
+
+## What to Read
+
+Agents should prioritize:
+
+- `docs/features/` — Feature implementation and rationale  
+- `docs/architecture/adr/` — Architectural decisions  
+- `docs/concepts/` — Core patterns and abstractions  
+- `docs/packages/[name]/` — Workspace-specific details  
+- `README.md`, `ONBOARDING.md`, `CONTRIBUTING.md` — Setup and standards  
+
+Use index files (`*.index.md`) to navigate efficiently.
+
+---
+
+## Usage Expectations
+
+- ✅ Reference relevant documents in the plan or task file  
+- ✅ Reuse prior design decisions and avoid re-debating settled architecture  
+- ✅ Cross-link helpful docs in responses where appropriate  
+- ✅ Load related `.md` files into memory when working on relevant code  
+- ✅ If unclear, run the `consult-documentation-index` process to search  
+
+---
+
+## Related Rules
+
+- @project-documentation-structure.rules.mdc  
+- @feature-task-plan-generator.rules.mdc  
+- @agent-self-report.rules.mdc

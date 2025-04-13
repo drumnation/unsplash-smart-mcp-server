@@ -1,0 +1,41 @@
+---
+description: TypeScript formatting, linting rules, and best practices.
+globs: ["*.ts", "*.tsx"]
+alwaysApply: false
+---
+# TypeScript Standards
+# Last Updated: 2025-03-31 10:13:02 AM
+
+## Formatting (Prettier)
+- maxLineLength: 100
+- indentSize: 2
+- indentStyle: space
+- formatter: prettier
+
+## Linting Rules
+- noUnusedVars: error
+- noUnescapedEntities: error
+- noExplicitAny: warn
+- noImgElement: warn
+- exhaustiveDeps: warn
+
+## Best Practices
+
+### HTML Entities
+- Use "&apos;" for apostrophes
+- Use "&quot;" for quotes
+
+### Imports
+- Prefer destructuring
+- Organize imports on save
+- Remove unused imports
+
+### Types
+- Avoid using "any" types
+- Prefer explicit types
+- Use built-in utility types when possible
+
+### Hooks
+- Include all dependencies in dependency arrays
+- Use useCallback for event handlers
+- Use useMemo for expensive computations 

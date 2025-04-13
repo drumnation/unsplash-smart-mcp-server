@@ -1,0 +1,102 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+**Core Principles:**
+
+1.  **Readability and Maintainability:** Prioritize code that is easy to understand and modify.
+2.  **Modularity:** Break down large components into smaller, manageable modules.
+3.  **Testability:** Ensure that code is easily testable.
+4.  **Performance:** Optimize code for efficiency.
+5.  **Consistency:** Adhere to established coding standards and patterns.
+6.  **Proactive Refactoring:** Address code complexity and length early.
+
+**Cursor Ruleset (Node.js/TypeScript):**
+
+**1. File Length and Refactoring:**
+
+* **Rule:** "Monitor all `.ts` and `.js` files. When a file exceeds 500 lines, initiate a refactoring process to break down the file into smaller, more focused modules or classes. Prioritize extracting logically related code blocks into separate files or functions."
+* **Action:**
+    * "Analyze the file to identify logical units of functionality."
+    * "Create new files or modules for these units, ensuring clear separation of concerns."
+    * "Update import/export statements to maintain functionality."
+    * "Ensure all extracted code is thoroughly tested."
+    * "Provide a summary of the refactoring steps taken and the rationale behind them."
+
+**2. Module Structure and Organization:**
+
+* **Rule:** "Organize code into logical modules based on functionality. Utilize the `src/` directory for source code and `test/` for tests. Create subdirectories within `src/` to represent different features or components."
+* **Action:**
+    * "Ensure that related files are grouped together in subdirectories."
+    * "Use `index.ts` files to aggregate exports from subdirectories, providing a clean API for other modules."
+    * "Maintain a clear and consistent file naming convention."
+
+**3. Function and Class Design:**
+
+* **Rule:** "Functions and classes should have a single responsibility. Keep functions short and focused. Classes should encapsulate related data and behavior."
+* **Action:**
+    * "Refactor long functions into smaller, more manageable functions."
+    * "Extract common logic into reusable functions or classes."
+    * "Adhere to the Single Responsibility Principle (SRP)."
+    * "Use descriptive names for functions and classes."
+    * "Use typescript interfaces to define the shape of objects."
+
+**4. Error Handling:**
+
+* **Rule:** "Implement robust error handling using `try...catch` blocks and custom error classes. Log errors with sufficient context for debugging."
+* **Action:**
+    * "Wrap potentially error-prone code in `try...catch` blocks."
+    * "Create custom error classes for specific error scenarios."
+    * "Log errors with timestamps, file names, and line numbers."
+    * "Avoid throwing generic errors, provide useful error messages."
+
+**5. Asynchronous Operations:**
+
+* **Rule:** "Use `async/await` for asynchronous operations. Avoid callback hell. Implement proper error handling for asynchronous code."
+* **Action:**
+    * "Prefer `async/await` over callbacks or promises."
+    * "Use `try...catch` blocks within `async` functions to handle errors."
+    * "Validate inputs and outputs of async functions."
+
+**6. Testing:**
+
+* **Rule:** "Write comprehensive unit tests for all code. Use a testing framework like Jest or Mocha. Aim for 100% test coverage, especially for critical modules."
+* **Action:**
+    * "Create test files in the `test/` directory, mirroring the `src/` directory structure."
+    * "Use mocking and stubbing to isolate units of code."
+    * "Write tests for edge cases and error scenarios."
+    * "Use code coverage tools to measure test effectiveness."
+
+**7. Code Style and Linting:**
+
+* **Rule:** "Adhere to a consistent code style using ESLint and Prettier. Configure these tools to enforce coding standards and automatically format code."
+* **Action:**
+    * "Install and configure ESLint and Prettier with appropriate rules."
+    * "Integrate linting and formatting into the development workflow (e.g., using Git hooks or CI/CD pipelines)."
+    * "Use a consistent indentation style, and consistent use of semicolons."
+
+**8. Documentation:**
+
+* **Rule:** "Document code using JSDoc comments. Provide clear and concise explanations for functions, classes, and modules."
+* **Action:**
+    * "Add JSDoc comments to all public functions, classes, and interfaces."
+    * "Explain the purpose, parameters, and return values of functions."
+    * "Document complex logic and algorithms."
+* "Create README files for modules and projects."
+
+**Cursor Prompts (Examples):**
+
+* "Analyze `src/utils.ts`. If it exceeds 500 lines, refactor it into smaller modules. Create new files in `src/utils/` for each module. Update imports and exports accordingly. Provide a summary of the refactoring."
+* "Refactor the `getUserData` function in `src/api.ts` to improve readability and maintainability. Ensure that all asynchronous operations are handled using `async/await` and that errors are properly logged."
+* "Write unit tests for the `calculateTotal` function in `src/cart.ts`. Aim for 100% test coverage. Use Jest for testing."
+* "Add JSDoc comments to all public functions and classes in `src/services/userService.ts`. Explain the purpose, parameters, and return values."
+* "Configure ESLint and Prettier for this project. Enforce consistent code style and automatically format code. Create a `.eslintrc.js` and `.prettierrc.js` file."
+
+**Key Considerations:**
+
+* **Iterative Refactoring:** Refactoring should be an ongoing process, not a one-time event.
+* **Human Oversight:** while Cursor can do much of the work, human review is still needed to ensure quality.
+* **Context Awareness:** Cursor needs to be aware of the project's overall architecture and design patterns.
+
+By implementing this ruleset, you can significantly improve the quality, maintainability, and scalability of your Node.js/TypeScript projects.

@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "stock_photo": {
+      "command": "powershell",
+      "args": ["-Command", "npx tsx src/server.ts"],
+      "disabled": false,
+      "env": {
+        "UNSPLASH_ACCESS_KEY": "Ahw5GzA-2fIX3ffrKHiHwTmy8dTWEmvWYpSK0wKzZw0"
+      }
+    }
+  }
+} 

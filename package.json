@@ -1,6 +1,6 @@
 {
   "name": "@drumnation/unsplash-smart-mcp-server",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "AI-powered FastMCP server for intelligent stock photo search, download, and attribution management from Unsplash",
   "main": "dist/server.js",
   "type": "module",
@@ -15,8 +15,10 @@
     "test:docker": "tsx tests/docker/docker-test.js",
     "test:docker:uptime": "tsx tests/docker/docker-uptime-test.js",
     "test:smithery": "tsx tests/docker/smithery-integration.js",
+    "test:mcp": "tsx tests/mcp/test-mcp.js",
     "lint": "eslint . --ext .ts",
     "generate-attributions": "tsx scripts/generate-attributions.ts",
+    "debug-server": "node scripts/debug-server.js",
     "prepare-release": "npm run build && npm run test",
     "publish-npm": "npm run prepare-release && npm publish --access public"
   },

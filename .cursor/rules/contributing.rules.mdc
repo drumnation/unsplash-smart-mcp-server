@@ -1,0 +1,24 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Rule: Auto-generate and maintain CONTRIBUTING.md
+
+Purpose:
+Keep CONTRIBUTING.md up-to-date with current dev workflow, project setup, branching strategy, and code standards.
+
+When to run:
+- When new scripts, packages, or commands are added
+- When Git branching or PR flow changes
+- When testing, linting, or formatting tools are updated
+
+Include:
+- Setup steps (pnpm, env vars, Docker/Colima, etc.)
+- Gitflow instructions
+- Dev standards (hooks, styled-components, test-first)
+- How to run tests, lint, and format
+- PR submission guidelines
+
+Format:
+Markdown with fenced code blocks and concise section headers.

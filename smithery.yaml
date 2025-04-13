@@ -47,3 +47,66 @@ startCommand:
         env
       };
     }
+
+# Add cursor-specific connection configuration
+connections:
+  cursor:
+    type: stdio
+    configSchema:
+      type: object
+      properties:
+        UNSPLASH_ACCESS_KEY:
+          type: string
+          description: "Unsplash API access key (required)"
+        PORT:
+          type: number
+          description: "Port for the server to listen on (optional)"
+        HOST:
+          type: string
+          description: "Host for the server (optional)"
+        ATTRIBUTION_DB_PATH:
+          type: string
+          description: "Custom path for attribution database (optional)"
+        DEFAULT_DOWNLOAD_DIR:
+          type: string
+          description: "Default download directory (optional, defaults to ./downloads)"
+      required:
+        - UNSPLASH_ACCESS_KEY
+    commandFunction: |
+      function(config) {
+        const env = { ...process.env };
+        
+        // Add config variables to environment
+        if (config.UNSPLASH_ACCESS_KEY) {
+          env.UNSPLASH_ACCESS_KEY = config.UNSPLASH_ACCESS_KEY;
+        }
+        if (config.PORT) {
+          env.PORT = config.PORT.toString();
+        }
+        if (config.HOST) {
+          env.HOST = config.HOST;
+        }
+        if (config.ATTRIBUTION_DB_PATH) {
+          env.ATTRIBUTION_DB_PATH = config.ATTRIBUTION_DB_PATH;
+        }
+        if (config.DEFAULT_DOWNLOAD_DIR) {
+          env.DEFAULT_DOWNLOAD_DIR = config.DEFAULT_DOWNLOAD_DIR;
+        }
+        
+        // Special handling for Windows platforms
+        const isWindows = process.platform === 'win32';
+        if (isWindows) {
+          return {
+            command: "node",
+            args: ["./node_modules/.bin/tsx", "src/server.ts"],
+            env,
+            shell: false
+          };
+        }
+        
+        return {
+          command: "npx",
+          args: ["tsx", "src/server.ts"],
+          env
+        };
+      }

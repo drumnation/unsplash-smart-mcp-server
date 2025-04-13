@@ -1,0 +1,67 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Rule: Automatic Git Commit Rules
+
+Purpose:
+Automatically commit staged changes at logical points in development using conventional commits and metadata logging.
+
+Trigger Conditions:
+- A feature, function, test, or refactor is logically complete
+- Total changed lines exceed 300 (across all files)
+- More than 8 files are staged
+- A stable group of files is complete (e.g. component + styles + test)
+- A previously failing test now passes due to these changes
+- A `.rules`, `README.md`, or config file has been modified
+
+Commit Message Structure:
+1. `commitSubject` (max 50 chars, required): One-line summary using Conventional Commit format (e.g., `feat: add login screen`)
+2. `commitBody` (optional): Wrap lines to ~72 chars, summarize key changes, bullet major additions if needed.
+3. `commitFooter` (optional): For breaking changes or issue refs (e.g., `BREAKING CHANGE:` or `Closes #123`)
+
+Commit Process:
+1. Analyze `git diff` or fallback to `git status` + file list
+2. Generate structured commit message: `Subject`, `Body`, `Footer`
+3. Stage all changes explicitly: `git add -- ${changedFilesList.join(' ')}`
+4. Commit using:
+   ```bash
+   echo "${fullMessage}" | git commit -F -
+   ```
+
+Metadata Logging:
+- After successful commit, retrieve the hash:
+  ```bash
+  git rev-parse HEAD
+  ```
+- Create a metadata JSON file at `.brain/git/commits/[xx]/[hash].json` with:
+  ```json
+  {
+    "hash": "<commit hash>",
+    "messageSubject": "<subject>",
+    "messageBody": "<body>",
+    "messageFooter": "<footer>",
+    "files": [<file list>],
+    "timestamp": "<UTC timestamp>",
+    "branch": "<branch name>"
+  }
+  ```
+- Create parent directories with `mkdir -p` as needed.
+
+Commit Policy Notes:
+- Skip automatic commit if:
+  - Files contain WIP, TODO, or FIXME comments
+  - Code is not in a logically complete state
+- Prefer small, atomic commits
+- Avoid committing unrelated changes together
+
+Final Output:
+- Return only:
+  ```json
+  {
+    "commitHash": "<commit hash>",
+    "metadataPath": "<path to metadata file>"
+  }
+  ```
+```
