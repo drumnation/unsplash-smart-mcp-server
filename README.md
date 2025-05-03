@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/drumnation-unsplash-smart-mcp-server-badge.png)](https://mseep.ai/app/drumnation-unsplash-smart-mcp-server)
+
 # 🖼️ Unsplash Smart MCP Server
 
 > **Empower your AI agents with stunning visuals, zero hassle.**
