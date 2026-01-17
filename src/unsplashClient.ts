@@ -1,4 +1,4 @@
-import { createWriteStream } from 'fs';
+import { createWriteStream, type WriteStream } from 'fs';
 import { ensureDir } from 'fs-extra';
 import path from 'path';
 import { Readable } from 'stream';
@@ -15,6 +15,7 @@ import { z } from 'zod';
 const API_BASE_URL = 'https://api.unsplash.com';
 const MAX_RETRIES = 3;
 const RETRY_DELAYS = [1000, 2000, 4000]; // Exponential backoff
+const REQUEST_TIMEOUT_MS = 30000; // 30 second timeout
 
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -39,9 +40,16 @@ export class UnsplashClient {
 
   private updateRateLimitFromHeaders(headers: Headers): void {
     const remaining = headers.get('X-Ratelimit-Remaining');
+    const resetTime = headers.get('X-Ratelimit-Reset');
+
     if (remaining) this.rateLimitRemaining = parseInt(remaining, 10);
-    // Unsplash resets hourly
-    this.rateLimitResetTime = Date.now() + 3600000;
+    if (resetTime) {
+      // Unsplash returns Unix timestamp in seconds
+      this.rateLimitResetTime = parseInt(resetTime, 10) * 1000;
+    } else {
+      // Fallback: assume hourly reset if header missing
+      this.rateLimitResetTime = Date.now() + 3600000;
+    }
   }
 
   /**
@@ -72,8 +80,16 @@ export class UnsplashClient {
     let lastError: Error | null = null;
 
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
       try {
-        const response = await fetch(url.toString(), { method, headers });
+        const response = await fetch(url.toString(), {
+          method,
+          headers,
+          signal: controller.signal
+        });
+        clearTimeout(timeout);
         this.updateRateLimitFromHeaders(response.headers);
 
         // Rate limited - wait and retry
@@ -115,11 +131,16 @@ export class UnsplashClient {
 
         return validation.data;
       } catch (error) {
+        clearTimeout(timeout);
         lastError = error instanceof Error ? error : new Error(String(error));
 
-        // Network errors - retry with backoff
-        if (attempt < MAX_RETRIES && (error as NodeJS.ErrnoException).code === 'ECONNRESET') {
-          console.warn(`Network error, retrying in ${RETRY_DELAYS[attempt]}ms...`);
+        const isRetryable =
+          (error as NodeJS.ErrnoException).code === 'ECONNRESET' ||
+          (error as Error).name === 'AbortError';
+
+        if (attempt < MAX_RETRIES && isRetryable) {
+          const reason = (error as Error).name === 'AbortError' ? 'Timeout' : 'Network error';
+          console.warn(`${reason}, retrying in ${RETRY_DELAYS[attempt]}ms...`);
           await sleep(RETRY_DELAYS[attempt]);
           continue;
         }
@@ -178,8 +199,13 @@ export class UnsplashClient {
     let lastError: Error | null = null;
 
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS * 2); // Longer timeout for downloads
+      let fileStream: WriteStream | null = null;
+
       try {
-        const response = await fetch(downloadUrl);
+        const response = await fetch(downloadUrl, { signal: controller.signal });
+        clearTimeout(timeout);
 
         if (!response.ok) {
           if (response.status >= 500 && attempt < MAX_RETRIES) {
@@ -190,7 +216,7 @@ export class UnsplashClient {
           throw new Error(`Failed to download image: ${response.status} ${response.statusText}`);
         }
 
-        const fileStream = createWriteStream(filePath);
+        fileStream = createWriteStream(filePath);
 
         if (response.body instanceof ReadableStream) {
           const reader = response.body.getReader();
@@ -208,21 +234,41 @@ export class UnsplashClient {
           readable.pipe(fileStream);
 
           return await new Promise((resolve, reject) => {
-            fileStream.on('finish', () => resolve(filePath));
-            fileStream.on('error', reject);
+            fileStream!.on('finish', () => resolve(filePath));
+            fileStream!.on('error', (err) => {
+              fileStream!.destroy();
+              reject(err);
+            });
           });
         } else {
           const buffer = await response.arrayBuffer();
           const nodeBuffer = Buffer.from(buffer);
           return await new Promise((resolve, reject) => {
-            fileStream.write(nodeBuffer, (err) => {
-              if (err) reject(err);
-              else fileStream.end(() => resolve(filePath));
+            fileStream!.write(nodeBuffer, (err) => {
+              if (err) {
+                fileStream!.destroy();
+                reject(err);
+              } else {
+                fileStream!.end(() => resolve(filePath));
+              }
             });
           });
         }
       } catch (error) {
+        clearTimeout(timeout);
+        if (fileStream) fileStream.destroy();
+
         lastError = error instanceof Error ? error : new Error(String(error));
+        const isRetryable =
+          (error as Error).name === 'AbortError' ||
+          (error as NodeJS.ErrnoException).code === 'ECONNRESET';
+
+        if (attempt < MAX_RETRIES && isRetryable) {
+          const reason = (error as Error).name === 'AbortError' ? 'Timeout' : 'Network error';
+          console.warn(`${reason} during download, retrying in ${RETRY_DELAYS[attempt]}ms...`);
+          await sleep(RETRY_DELAYS[attempt]);
+          continue;
+        }
 
         if (attempt < MAX_RETRIES) {
           console.warn(`Download error, retrying in ${RETRY_DELAYS[attempt]}ms...`);
@@ -235,4 +281,5 @@ export class UnsplashClient {
     console.error(`Failed to download photo ${photo.id} after ${MAX_RETRIES + 1} attempts:`, lastError);
     throw lastError;
   }
-} 
+}
+ 
