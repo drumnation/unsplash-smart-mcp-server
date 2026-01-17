@@ -18,16 +18,22 @@ if (!parsedEnv.success) {
 }
 
 // Determine if we're in a test environment
-const isTestEnvironment = process.env.NODE_ENV === 'test' || 
+const isTestEnvironment = process.env.NODE_ENV === 'test' ||
                          process.argv.some(arg => arg.includes('test'));
 
-// Use a test API key if in test environment and no key is provided
-const apiKey = parsedEnv.data.UNSPLASH_ACCESS_KEY || 
-              (isTestEnvironment ? 'Ahw5GzA-2fIX3ffrKHiHwTmy8dTWEmvWYpSK0wKzZw0' : undefined);
+// In test environment, use a placeholder that tests should mock
+// NEVER commit real API keys to source code
+const apiKey = parsedEnv.data.UNSPLASH_ACCESS_KEY ||
+              (isTestEnvironment ? 'TEST_API_KEY_PLACEHOLDER' : undefined);
 
 // Validate API key
 if (!apiKey) {
   throw new Error('Unsplash API key is required. Set UNSPLASH_ACCESS_KEY environment variable.');
+}
+
+// Warn if using placeholder in non-mocked test
+if (apiKey === 'TEST_API_KEY_PLACEHOLDER' && isTestEnvironment) {
+  console.warn('⚠️  Using placeholder API key. Ensure tests mock the Unsplash API.');
 }
 
 // Export validated config

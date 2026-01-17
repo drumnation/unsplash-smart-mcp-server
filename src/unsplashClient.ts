@@ -13,16 +13,39 @@ import {
 import { z } from 'zod';
 
 const API_BASE_URL = 'https://api.unsplash.com';
+const MAX_RETRIES = 3;
+const RETRY_DELAYS = [1000, 2000, 4000]; // Exponential backoff
+
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 export class UnsplashClient {
   private accessKey: string;
+  private rateLimitRemaining = 50;
+  private rateLimitResetTime = 0;
 
   constructor() {
     this.accessKey = config.unsplash.accessKey;
   }
 
+  /** Get current rate limit status */
+  getRateLimitStatus(): { remaining: number; resetsAt: Date } {
+    return {
+      remaining: this.rateLimitRemaining,
+      resetsAt: new Date(this.rateLimitResetTime)
+    };
+  }
+
+  private updateRateLimitFromHeaders(headers: Headers): void {
+    const remaining = headers.get('X-Ratelimit-Remaining');
+    if (remaining) this.rateLimitRemaining = parseInt(remaining, 10);
+    // Unsplash resets hourly
+    this.rateLimitResetTime = Date.now() + 3600000;
+  }
+
   /**
-   * Make a request to the Unsplash API
+   * Make a request to the Unsplash API with retry logic
    */
   private async request<T>(
     endpoint: string,
@@ -31,8 +54,7 @@ export class UnsplashClient {
     method: 'GET' | 'POST' = 'GET'
   ): Promise<T> {
     const url = new URL(`${API_BASE_URL}${endpoint}`);
-    
-    // Add query parameters
+
     if (params && method === 'GET') {
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined) {
@@ -47,39 +69,67 @@ export class UnsplashClient {
       'Content-Type': 'application/json'
     };
 
-    try {
-      const response = await fetch(url.toString(), {
-        method,
-        headers
-      });
+    let lastError: Error | null = null;
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Unsplash API error (${response.status}): ${errorText}`);
-      }
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        const response = await fetch(url.toString(), { method, headers });
+        this.updateRateLimitFromHeaders(response.headers);
 
-      // Handle no-content responses (like download tracking)
-      if (response.status === 204 || response.headers.get('content-length') === '0') {
-        if (endpoint.includes('/download')) {
-          // Special case for download tracking
-          return { url: '' } as unknown as T;
+        // Rate limited - wait and retry
+        if (response.status === 429) {
+          const retryAfter = response.headers.get('Retry-After');
+          const waitMs = retryAfter ? parseInt(retryAfter, 10) * 1000 : 60000;
+          console.warn(`Rate limited. Waiting ${waitMs / 1000}s...`);
+          await sleep(waitMs);
+          continue;
         }
-        return {} as T;
+
+        // Server error - retry with backoff
+        if (response.status >= 500 && attempt < MAX_RETRIES) {
+          console.warn(`Server error ${response.status}, retrying in ${RETRY_DELAYS[attempt]}ms...`);
+          await sleep(RETRY_DELAYS[attempt]);
+          continue;
+        }
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Unsplash API error (${response.status}): ${errorText}`);
+        }
+
+        // Handle no-content responses
+        if (response.status === 204 || response.headers.get('content-length') === '0') {
+          if (endpoint.includes('/download')) {
+            return { url: '' } as unknown as T;
+          }
+          return {} as T;
+        }
+
+        const data = await response.json();
+        const validation = schema.safeParse(data);
+
+        if (!validation.success) {
+          console.error('Unsplash API response validation failed:', validation.error.flatten());
+          throw new Error('Invalid data received from Unsplash API');
+        }
+
+        return validation.data;
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+
+        // Network errors - retry with backoff
+        if (attempt < MAX_RETRIES && (error as NodeJS.ErrnoException).code === 'ECONNRESET') {
+          console.warn(`Network error, retrying in ${RETRY_DELAYS[attempt]}ms...`);
+          await sleep(RETRY_DELAYS[attempt]);
+          continue;
+        }
+
+        if (attempt === MAX_RETRIES) break;
       }
-
-      const data = await response.json();
-      const validation = schema.safeParse(data);
-
-      if (!validation.success) {
-        console.error('Unsplash API response validation failed:', validation.error.flatten());
-        throw new Error('Invalid data received from Unsplash API');
-      }
-
-      return validation.data;
-    } catch (error) {
-      console.error(`Error during Unsplash API request to ${endpoint}:`, error);
-      throw error;
     }
+
+    console.error(`Failed after ${MAX_RETRIES + 1} attempts to ${endpoint}:`, lastError);
+    throw lastError;
   }
 
   /**
@@ -114,73 +164,75 @@ export class UnsplashClient {
   }
 
   /**
-   * Download a photo to a local file
+   * Download a photo to a local file with retry logic
    */
   async downloadPhoto(photo: Photo, downloadDir: string, customFilename?: string, customUrl?: string): Promise<string> {
-    // Ensure the download directory exists
     await ensureDir(downloadDir);
-
-    // Track the download first (required by Unsplash API terms)
     await this.trackDownload(photo.id);
 
-    // Prepare the file path - using the photo ID to ensure uniqueness
     const filenameBase = customFilename || `unsplash-${photo.id}`;
     const filename = `${filenameBase}.jpg`;
     const filePath = path.join(downloadDir, filename);
+    const downloadUrl = customUrl || photo.urls.full;
 
-    try {
-      // Use the custom URL if provided, otherwise fall back to the default URL
-      const downloadUrl = customUrl || photo.urls.full;
-      
-      // Fetch the image
-      const response = await fetch(downloadUrl);
-      
-      if (!response.ok) {
-        throw new Error(`Failed to download image: ${response.status} ${response.statusText}`);
-      }
+    let lastError: Error | null = null;
 
-      // Stream the image to a file
-      const fileStream = createWriteStream(filePath);
-      
-      if (response.body instanceof ReadableStream) {
-        // For environments with native fetch
-        const reader = response.body.getReader();
-        const readable = new Readable({
-          async read() {
-            const { done, value } = await reader.read();
-            if (done) {
-              this.push(null);
-            } else {
-              this.push(Buffer.from(value));
-            }
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        const response = await fetch(downloadUrl);
+
+        if (!response.ok) {
+          if (response.status >= 500 && attempt < MAX_RETRIES) {
+            console.warn(`Download failed (${response.status}), retrying in ${RETRY_DELAYS[attempt]}ms...`);
+            await sleep(RETRY_DELAYS[attempt]);
+            continue;
           }
-        });
-        
-        readable.pipe(fileStream);
-        
-        return new Promise((resolve, reject) => {
-          fileStream.on('finish', () => resolve(filePath));
-          fileStream.on('error', reject);
-        });
-      } else {
-        // Fallback for other environments
-        const buffer = await response.arrayBuffer();
-        const nodeBuffer = Buffer.from(buffer);
-        return new Promise((resolve, reject) => {
-          fileStream.write(nodeBuffer, (err) => {
-            if (err) {
-              reject(err);
-            } else {
-              fileStream.end(() => {
-                resolve(filePath);
-              });
+          throw new Error(`Failed to download image: ${response.status} ${response.statusText}`);
+        }
+
+        const fileStream = createWriteStream(filePath);
+
+        if (response.body instanceof ReadableStream) {
+          const reader = response.body.getReader();
+          const readable = new Readable({
+            async read() {
+              const { done, value } = await reader.read();
+              if (done) {
+                this.push(null);
+              } else {
+                this.push(Buffer.from(value));
+              }
             }
           });
-        });
+
+          readable.pipe(fileStream);
+
+          return await new Promise((resolve, reject) => {
+            fileStream.on('finish', () => resolve(filePath));
+            fileStream.on('error', reject);
+          });
+        } else {
+          const buffer = await response.arrayBuffer();
+          const nodeBuffer = Buffer.from(buffer);
+          return await new Promise((resolve, reject) => {
+            fileStream.write(nodeBuffer, (err) => {
+              if (err) reject(err);
+              else fileStream.end(() => resolve(filePath));
+            });
+          });
+        }
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+
+        if (attempt < MAX_RETRIES) {
+          console.warn(`Download error, retrying in ${RETRY_DELAYS[attempt]}ms...`);
+          await sleep(RETRY_DELAYS[attempt]);
+          continue;
+        }
       }
-    } catch (error) {
-      console.error(`Error downloading photo ${photo.id}:`, error);
-      throw error;
     }
+
+    console.error(`Failed to download photo ${photo.id} after ${MAX_RETRIES + 1} attempts:`, lastError);
+    throw lastError;
   }
 } 
